@@ -12,6 +12,8 @@ module.exports.getUser = (req, res) => {
     .catch((err) => {
       if (err.message === 'NotValid') {
         res.status(404).send({ message: 'Пользователь по указанному _id не найден' });
+      } else if (err.name === 'AssertionError') {
+        res.status(400).send({ message: 'Переданы некорректные данные пользователя' });
       } else {
         res.status(500).send({ message: err.message });
       }
@@ -22,13 +24,7 @@ module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
     .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      if (err.message === 'NotValid') {
-        res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
-      } else {
-        res.status(500).send({ message: err.message });
-      }
-    });
+    .catch((err) => res.status(400).send({ message: err.message }));
 };
 
 module.exports.updateUser = (req, res) => {
