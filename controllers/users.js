@@ -8,6 +8,7 @@ module.exports.getUsers = (req, res) => {
 
 module.exports.getUser = (req, res) => {
   User.findById(req.params.userId)
+    .orFail(new Error('NotValid'))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.message === 'NotValid') {
@@ -41,6 +42,7 @@ module.exports.updateUser = (req, res) => {
       upsert: true, // если пользователь не найден, он будет создан
     },
   )
+    .orFail(new Error('NotValid'))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.message === 'NotValid') {
@@ -64,6 +66,7 @@ module.exports.updateAvatar = (req, res) => {
       upsert: true, // если пользователь не найден, он будет создан
     },
   )
+    .orFail(new Error('NotValid'))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.message === 'NotValid') {
