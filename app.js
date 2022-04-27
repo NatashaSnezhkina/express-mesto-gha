@@ -9,16 +9,14 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-mongoose.connect('mongodb://localhost:27017/mestodb', () => {
-  console.log('Yes');
-});
+mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
   req.user = {
-    _id: '6268269dc4c2d10494d64451'
+    _id: '6268269dc4c2d10494d64451',
   };
 
   next();
@@ -26,11 +24,8 @@ app.use((req, res, next) => {
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
-
 app.get('/', (req, res) => {
   res.send('Hello world!');
 });
 
-app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
-});
+app.listen(PORT);
