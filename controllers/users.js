@@ -12,7 +12,7 @@ module.exports.getUser = (req, res) => {
     .catch((err) => {
       if (err.message === 'NotValid') {
         res.status(404).send({ message: 'Пользователь по указанному _id не найден' });
-      } else if (err.name === 'AssertionError') {
+      } else if (err.name === 'CastError' || err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные пользователя' });
       } else {
         res.status(500).send({ message: err.message });

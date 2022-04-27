@@ -18,8 +18,15 @@ module.exports.createCard = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(404)
-      .send({ message: 'Карточка с указанным _id не найдена' }));
+    .catch((err) => {
+      if (err.message === 'NotValid') {
+        res.status(404).send({ message: 'Карточка с указанным _id не найдена' });
+      } else if (err.name === 'CastError' || err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Переданы некорректные данные при создании карточки' });
+      } else {
+        res.status(500).send({ message: err.message });
+      }
+    });
 };
 
 module.exports.likeCard = (req, res) => {
@@ -28,6 +35,7 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id
     { new: true }, // обновленный объект
   )
+    .orFail(new Error('NotValid'))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.message === 'NotValid') {
@@ -44,6 +52,7 @@ module.exports.dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
+    .orFail(new Error('NotValid'))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.message === 'NotValid') {
