@@ -38,8 +38,8 @@ app.post('/signup', celebrate({
     password: Joi.string().required().min(2),
   }),
 }), createUser);
-app.use('/', auth, require('./routes/users'));
-app.use('/', auth, require('./routes/cards'));
+app.use('/users', auth, require('./routes/users'));
+app.use('/cards', auth, require('./routes/cards'));
 
 app.all('*', auth, () => {
   throw new NotFoundError('Ошибка 404. Страница не найдена');
