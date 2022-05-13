@@ -16,15 +16,16 @@ module.exports.getUsers = (req, res) => {
 module.exports.getUser = (req, res, next) => {
   User.findOne({ _id: req.params.userId })
     .then((user) => {
-      if (!user) {
+      if (user) {
+        res.send({
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+          _id: user._id,
+        });
+      } else {
         throw new NotFoundError('Пользователь с указанным _id не найден');
       }
-      res.send({
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        _id: user._id,
-      });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -34,7 +35,7 @@ module.exports.getUser = (req, res, next) => {
     });
 };
 
-module.exports.getUserById = (req, res, err, next) => {
+module.exports.getUserById = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       res.send({ data: user });
