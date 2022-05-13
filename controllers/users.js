@@ -5,6 +5,8 @@ const NotFoundError = require('../errors/404-error');
 const IncorrectDataError = require('../errors/400-error');
 const ConflictError = require('../errors/409-error');
 
+const JWT_SECRET = 'secret-key';
+
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
@@ -15,22 +17,26 @@ module.exports.getUser = (req, res, next) => {
   User.findOne({ _id: req.params.userId })
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Нет пользователя с таким id');
+        throw new NotFoundError('Пользователь с указанным _id не найден');
       }
-      res.send({ data: user });
+      res.send({
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        _id: user._id,
+      });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new IncorrectDataError('Переданы некорректные данные'));
+      }
+      next(err);
+    });
 };
 
 module.exports.getUserById = (req, res, err, next) => {
-  User.findById(req.params.userId)
-    .orFail(new Error('NotValid'))
+  User.findById(req.user._id)
     .then((user) => {
-      if (!user) {
-        throw new NotFoundError('Пользователь по указанному _id не найден');
-      } else if (err.name === 'CastError' || err.name === 'ValidationError') {
-        throw new IncorrectDataError('Переданы некорректные данные');
-      }
       res.send({ data: user });
     })
     .catch(next);
@@ -60,7 +66,7 @@ module.exports.createUser = (req, res, next) => {
     });
 };
 
-module.exports.updateUser = (req, res, err, next) => {
+module.exports.updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -74,19 +80,25 @@ module.exports.updateUser = (req, res, err, next) => {
       upsert: true, // если пользователь не найден, он будет создан
     },
   )
-    .orFail(new Error('NotValid'))
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь по указанному _id не найден');
-      } else if (err.name === 'CastError' || err.name === 'ValidationError') {
-        throw new IncorrectDataError('Переданы некорректные данные при обновлении данных пользователя');
+        throw new NotFoundError('Пользователь не найден');
       }
-      res.send({ data: user });
+      res.send({
+        name: user.name,
+        about: user.about,
+        _id: user._id,
+      });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        next(new IncorrectDataError('Переданы некорректные данные при обновлении пользователя'));
+      }
+      next(err);
+    });
 };
 
-module.exports.updateAvatar = (req, res, err, next) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -99,34 +111,41 @@ module.exports.updateAvatar = (req, res, err, next) => {
       upsert: true, // если пользователь не найден, он будет создан
     },
   )
-    .orFail(new Error('NotValid'))
     .then((user) => {
-      if (!user) {
-        throw new NotFoundError('Пользователь по указанному _id не найден');
-      } else if (err.name === 'CastError' || err.name === 'ValidationError') {
-        throw new IncorrectDataError('Переданы некорректные данные при обновлении данных пользователя');
+      if (user) {
+        res.send({
+          avatar: user.avatar,
+          _id: user._id,
+        });
+      } else {
+        throw new NotFoundError('Пользователь не найден');
       }
-
-      res.send({ data: user });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        next(new IncorrectDataError('Переданы некорректные данные при обновлении аватара'));
+      }
+      next(err);
+    });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
-    .then(() => {
+    .then((user) => {
       const token = jwt.sign(
-        { _id: 'd285e3dceed844f902650f40' },
-        'some-secret-key',
+        { _id: user._id },
+        JWT_SECRET,
         { expiresIn: '7d' },
       );
-      res.send({ token });
-    })
-    .catch((err) => {
       res
-        .status(401)
-        .send({ message: err.message });
-    });
+        .cookie('jwt', token, {
+          maxAge: 3600000 * 24 * 7,
+          httpOnly: true,
+          sameSite: true,
+        })
+        .send({ message: 'Успешная авторизация' });
+    })
+    .catch(next);
 };
