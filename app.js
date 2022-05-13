@@ -1,13 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { celebrate, Joi } = require('celebrate');
+const { celebrate, Joi, errors } = require('celebrate');
 const {
   login,
   createUser,
 } = require('./controllers/users');
 const { createCard } = require('./controllers/cards');
 const auth = require('./middlewares/auth');
+const NotFoundError = require('./errors/404-error');
 
 const { PORT = 3000 } = process.env;
 
@@ -33,8 +34,16 @@ app.post('/signup', celebrate({
   }),
 }), createUser);
 
+app.post('/cards', auth, createCard);
+
 app.use('/', auth, require('./routes/users'));
 app.use('/', auth, require('./routes/cards'));
+
+app.all('*', auth, () => {
+  throw new NotFoundError('Ошибка 404. Страница не найдена');
+});
+
+app.use(errors());
 
 app.use((err, req, res) => {
   // если у ошибки нет статуса, выставляем 500
@@ -50,5 +59,4 @@ app.use((err, req, res) => {
     });
 });
 
-app.post('/cards', auth, createCard);
 app.listen(PORT);

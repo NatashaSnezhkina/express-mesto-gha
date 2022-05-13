@@ -52,12 +52,6 @@ module.exports.createUser = (req, res, next) => {
       _id: user._id,
       email: user.email,
     }))
-    .then((user) => {
-      if (!user) {
-        throw new NotFoundError('Пользователь по указанному _id не найден');
-      }
-      res.send(user);
-    })
     .catch((err) => {
       if (err.code === 11000) {
         next(new ConflictError('Пользователь уже существует'));
