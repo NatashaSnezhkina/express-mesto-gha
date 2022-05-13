@@ -13,8 +13,8 @@ module.exports.getUsers = (req, res) => {
     .catch((err) => res.status(500).send({ message: err.message }));
 };
 
-module.exports.getUser = (req, res, next) => {
-  User.findOne({ _id: req.params.userId })
+module.exports.getUserById = (req, res, next) => {
+  User.findById({ _id: req.params.userId })
     .then((user) => {
       if (user) {
         res.send({
@@ -35,7 +35,7 @@ module.exports.getUser = (req, res, next) => {
     });
 };
 
-module.exports.getUserById = (req, res, next) => {
+module.exports.getMyUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       res.send({ data: user });

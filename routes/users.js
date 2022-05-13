@@ -2,7 +2,7 @@ const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 const validator = require('validator');
 const {
-  getUser,
+  getMyUser,
   getUsers,
   updateUser,
   updateAvatar,
@@ -10,7 +10,7 @@ const {
 } = require('../controllers/users');
 
 router.get('/', getUsers);
-router.get('/me', getUser);
+router.get('/me', getMyUser);
 
 router.get('/:userId', celebrate({
   params: Joi.object().keys({
