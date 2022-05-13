@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
-const IncorrectDataError = require('../errors/incorrect-data-error');
+const IncorrectDataError = require('../errors/400-error');
 
 const userSchema = new mongoose.Schema({
   name: {

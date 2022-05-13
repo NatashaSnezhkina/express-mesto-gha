@@ -1,8 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const NotFoundError = require('../errors/not-found-error');
-const IncorrectDataError = require('../errors/incorrect-data-error');
+const NotFoundError = require('../errors/404-error');
+const IncorrectDataError = require('../errors/400-error');
+const ConflictError = require('../errors/409-error');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -35,7 +36,7 @@ module.exports.getUserById = (req, res, err, next) => {
     .catch(next);
 };
 
-module.exports.createUser = (req, res, err, next) => {
+module.exports.createUser = (req, res, next) => {
   bcrypt.hash(req.body.password, 10)
     .then((hash) => User.create({
       name: req.body.name,
@@ -44,13 +45,25 @@ module.exports.createUser = (req, res, err, next) => {
       email: req.body.email,
       password: hash,
     }))
+    .then((user) => res.send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      _id: user._id,
+      email: user.email,
+    }))
     .then((user) => {
       if (!user) {
         throw new NotFoundError('Пользователь по указанному _id не найден');
       }
       res.send(user);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.code === 11000) {
+        next(new ConflictError('Пользователь уже существует'));
+      }
+      next(err);
+    });
 };
 
 module.exports.updateUser = (req, res, err, next) => {

@@ -1,6 +1,6 @@
 const Card = require('../models/card');
-const NotFoundError = require('../errors/not-found-error');
-const IncorrectDataError = require('../errors/incorrect-data-error');
+const NotFoundError = require('../errors/404-error');
+const IncorrectDataError = require('../errors/400-error');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
