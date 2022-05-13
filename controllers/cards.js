@@ -42,14 +42,14 @@ module.exports.deleteCard = (req, res, next) => {
       }
 
       Card.findByIdAndRemove(req.params.cardId)
-        .then((card) => {
+        .then((deletedCard) => {
           res.send({
-            name: card.name,
-            link: card.link,
-            owner: card.owner,
-            likes: card.likes,
-            _id: card._id,
-            createdAt: card.createdAt,
+            name: deletedCard.name,
+            link: deletedCard.link,
+            owner: deletedCard.owner,
+            likes: deletedCard.likes,
+            _id: deletedCard._id,
+            createdAt: deletedCard.createdAt,
           });
         })
         .catch(next);
