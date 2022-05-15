@@ -7,10 +7,16 @@ const ConflictError = require('../errors/409-error');
 
 const JWT_SECRET = 'secret-key';
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.send({ data: users }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .then((users) => {
+      if (users) {
+        res.send({ data: users });
+      } else {
+        throw new NotFoundError('Пользователи не найдены');
+      }
+    })
+    .catch(next);
 };
 
 module.exports.getUserById = (req, res, next) => {
@@ -60,7 +66,9 @@ module.exports.createUser = (req, res, next) => {
       email: user.email,
     }))
     .catch((err) => {
-      if (err.code === 11000) {
+      if (err.name === 'ValidationError') {
+        next(new IncorrectDataError('Переданы некорректные данные при создании карточки'));
+      } else if (err.code === 11000) {
         next(new ConflictError('Пользователь уже существует'));
       }
       next(err);
@@ -78,7 +86,6 @@ module.exports.updateUser = (req, res, next) => {
     {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
-      upsert: true, // если пользователь не найден, он будет создан
     },
   )
     .then((user) => {
@@ -109,7 +116,6 @@ module.exports.updateAvatar = (req, res, next) => {
     {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
-      upsert: true, // если пользователь не найден, он будет создан
     },
   )
     .then((user) => {
