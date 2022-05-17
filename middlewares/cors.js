@@ -1,31 +1,32 @@
-const allowedCors = [
-  'https://praktikum.tk',
-  'http://praktikum.tk',
-  'localhost:3000',
-  'http://localhost:3000',
-  'https://localhost:3000',
-  'http://51.250.70.197:3000',
-  'https://51.250.70.197:3000',
-  'http://api.mesto.natasha.snezh.nomoredomains.xyz',
-  'https://api.mesto.natasha.snezh.nomoredomains.xyz',
-  'http://mesto.natasha.snezh.nomoredomains.xyz',
-  'https://mesto.natasha.snezh.nomoredomains.xyz',
-];
+// const allowedCors = [
+//   'https://praktikum.tk',
+//   'http://praktikum.tk',
+//   'localhost:3000/',
+//   'http://localhost:3000/',
+//   'https://localhost:3000/',
+//   'http://51.250.70.197:3000',
+//   'https://51.250.70.197:3000',
+//   'http://api.mesto.natasha.snezh.nomoredomains.xyz/',
+//   'https://api.mesto.natasha.snezh.nomoredomains.xyz/',
+//   'http://mesto.natasha.snezh.nomoredomains.xyz/',
+//   'https://mesto.natasha.snezh.nomoredomains.xyz/',
+// ];
 
-module.exports = (req, res, next) => {
+const cors = (req, res, next) => {
   const { origin } = req.headers;
-  if (allowedCors.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  }
-
   const { method } = req;
-  const DEFAULT_ALLOWED_METHODS = 'GET,HEAD,PUT,PATCH,POST,DELETE';
   const requestHeaders = req.headers['access-control-request-headers'];
+  const DEFAULT_ALLOWED_METHODS = 'GET,HEAD,PUT,PATCH,POST,DELETE';
+  res.header('Access-Control-Allow-Origin', origin);
+  res.header('Access-Control-Allow-Credentials', true);
   if (method === 'OPTIONS') {
     res.header('Access-Control-Allow-Methods', DEFAULT_ALLOWED_METHODS);
     res.header('Access-Control-Allow-Headers', requestHeaders);
     return res.end();
   }
-
   return next();
+};
+
+module.exports = {
+  cors,
 };
