@@ -27,15 +27,15 @@ app.use(helmet());
 const allowedCors = [
   'https://praktikum.tk',
   'http://praktikum.tk',
-  'localhost:3000',
-  'http://localhost:3000',
-  'https://localhost:3000',
+  'localhost:3000/',
+  'http://localhost:3000/',
+  'https://localhost:3000/',
   'http://51.250.70.197:3000',
   'https://51.250.70.197:3000',
-  'http://api.mesto.natasha.snezh.nomoredomains.xyz',
-  'https://api.mesto.natasha.snezh.nomoredomains.xyz',
-  'http://mesto.natasha.snezh.nomoredomains.xyz',
-  'https://mesto.natasha.snezh.nomoredomains.xyz',
+  'http://api.mesto.natasha.snezh.nomoredomains.xyz/',
+  'https://api.mesto.natasha.snezh.nomoredomains.xyz/',
+  'http://mesto.natasha.snezh.nomoredomains.xyz/',
+  'https://mesto.natasha.snezh.nomoredomains.xyz/',
 ];
 
 app.use((req, res, next) => {
