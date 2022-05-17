@@ -10,6 +10,7 @@ const {
 } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const error = require('./middlewares/error');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 const NotFoundError = require('./errors/404-error');
 
 const { PORT = 3000 } = process.env;
@@ -17,6 +18,36 @@ const { PORT = 3000 } = process.env;
 const app = express();
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
+// Массив доменов, с которых разрешены кросс-доменные запросы
+const allowedCors = [
+  'https://praktikum.tk',
+  'http://praktikum.tk',
+  'http://api.mesto.natasha.snezh.nomoredomains.xyz',
+  'http://localhost:3000',
+  'https://api.mesto.natasha.snezh.nomoredomains.xyz/signin',
+  'https://api.mesto.natasha.snezh.nomoredomains.xyz/signup',
+];
+
+app.use((req, res, next) => {
+  const { origin } = req.headers; // Сохраняем источник запроса в переменную origin
+  // проверяем, что источник запроса есть среди разрешённых
+  if (allowedCors.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', true);
+  }
+  const { method } = req;
+  const requestHeaders = req.headers['access-control-request-headers'];
+  const DEFAULT_ALLOWED_METHODS = 'GET,HEAD,PUT,PATCH,POST,DELETE';
+  if (method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Headers', requestHeaders);
+    res.header('Access-Control-Allow-Methods', DEFAULT_ALLOWED_METHODS);
+    return res.end();
+  }
+
+  return next();
+});
+
+app.use(requestLogger);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -47,6 +78,7 @@ app.all('*', auth, () => {
   throw new NotFoundError('Ошибка 404. Страница не найдена');
 });
 
+app.use(errorLogger);
 app.use(errors());
 app.use(error);
 
