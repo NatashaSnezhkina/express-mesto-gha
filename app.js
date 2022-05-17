@@ -23,9 +23,13 @@ const allowedCors = [
   'https://praktikum.tk',
   'http://praktikum.tk',
   'http://api.mesto.natasha.snezh.nomoredomains.xyz',
-  'http://localhost:3000',
+  'http://api.mesto.natasha.snezh.nomoredomains.xyz/signin',
+  'http://api.mesto.natasha.snezh.nomoredomains.xyz/signup',
+  'https://api.mesto.natasha.snezh.nomoredomains.xyz',
   'https://api.mesto.natasha.snezh.nomoredomains.xyz/signin',
   'https://api.mesto.natasha.snezh.nomoredomains.xyz/signup',
+  'http://localhost:3000',
+  'https://localhost:3000',
 ];
 
 app.use((req, res, next) => {
