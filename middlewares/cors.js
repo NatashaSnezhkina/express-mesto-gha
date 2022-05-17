@@ -12,7 +12,7 @@
 //   'https://mesto.natasha.snezh.nomoredomains.xyz/',
 // ];
 
-const cors = (req, res, next) => {
+module.exports = (req, res, next) => {
   const { origin } = req.headers;
   const { method } = req;
   const requestHeaders = req.headers['access-control-request-headers'];
@@ -25,8 +25,4 @@ const cors = (req, res, next) => {
     return res.end();
   }
   return next();
-};
-
-module.exports = {
-  cors,
 };
