@@ -10,7 +10,6 @@ const {
 } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const error = require('./middlewares/error');
-const cors = require('./middlewares/cors');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const NotFoundError = require('./errors/404-error');
 
@@ -24,7 +23,38 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(helmet());
-app.use(cors());
+
+const allowedCors = [
+  'https://praktikum.tk',
+  'http://praktikum.tk',
+  'localhost:3000',
+  'http://localhost:3000',
+  'https://localhost:3000',
+  'http://51.250.70.197:3000',
+  'https://51.250.70.197:3000',
+  'http://api.mesto.natasha.snezh.nomoredomains.xyz',
+  'https://api.mesto.natasha.snezh.nomoredomains.xyz',
+  'http://mesto.natasha.snezh.nomoredomains.xyz',
+  'https://mesto.natasha.snezh.nomoredomains.xyz',
+];
+
+app.use((req, res, next) => {
+  const { origin } = req.headers;
+  if (allowedCors.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+
+  const { method } = req;
+  const DEFAULT_ALLOWED_METHODS = 'GET,HEAD,PUT,PATCH,POST,DELETE';
+  const requestHeaders = req.headers['access-control-request-headers'];
+  if (method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Methods', DEFAULT_ALLOWED_METHODS);
+    res.header('Access-Control-Allow-Headers', requestHeaders);
+    return res.end();
+  }
+
+  return next();
+});
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
