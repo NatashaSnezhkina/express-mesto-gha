@@ -5,6 +5,7 @@ const User = require('../models/user');
 const NotFoundError = require('../errors/404-error');
 const IncorrectDataError = require('../errors/400-error');
 const ConflictError = require('../errors/409-error');
+const AuthError = require('../errors/401-error');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -145,14 +146,11 @@ module.exports.login = (req, res, next) => {
       const token = jwt.sign(
         { _id: user._id },
         NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+        { expiresIn: '7d' },
       );
-      res
-        .cookie('jwt', token, {
-          maxAge: 3600000 * 24 * 7,
-          httpOnly: true,
-          sameSite: true,
-        })
-        .send({ message: 'Успешная авторизация' });
+      res.send({ token });
     })
-    .catch(next);
+    .catch(() => {
+      next(new AuthError('Неверно указана электронная почта или пороль'));
+    });
 };
