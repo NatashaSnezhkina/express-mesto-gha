@@ -155,7 +155,7 @@ module.exports.login = (req, res, next) => {
       res.send({ token });
     })
     .catch(() => {
-      next(new AuthError('Неверно указана электронная почта или пороль'));
+      next(new AuthError(`${email}'Неверно указана электронная почта или пороль'`));
     });
 };
 
