@@ -6,7 +6,7 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
-  console.log(NODE_ENV, JWT_SECRET);
+  console.log(authorization);
   // убеждаемся, что он есть или начинается с Bearer
   if (!authorization || !authorization.startsWith('Bearer ')) {
     throw new AuthError('Необходима авторизация1');
